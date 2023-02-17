@@ -9,13 +9,13 @@ db = mysql.connector.connect(
 )
 
 
-async def create_user_db(data):
+async def check_user_db(data):
     login = data['login']
     password = data['password']
     cursor = db.cursor()
-    query = "INSERT INTO users (login, password) VALUES (%s, %s)"
+    query = "SELECT * FROM users WHERE login = %s AND password = %s"
     values = (login, password)
     cursor.execute(query, values)
-    db.commit()
+    result = cursor.fetchone()
     cursor.close()
-    db.close()
+    return result is not None
