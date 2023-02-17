@@ -15,6 +15,7 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
     cfg.register_handlers(dp)
+    await sqlite.connect()
     await dp.start_polling()
 
 

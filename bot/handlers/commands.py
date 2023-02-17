@@ -1,4 +1,5 @@
 from aiogram import Dispatcher, types
+from bot.database.sqlite import sqlite
 from bot.keyboards import inline
 from bot import states as st
 
