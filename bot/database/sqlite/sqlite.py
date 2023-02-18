@@ -1,4 +1,5 @@
 import sqlite3
+from passlib.hash import phpass
 
 db = sqlite3.connect('bot_sqlite3')
 cur = db.cursor()
@@ -6,6 +7,7 @@ cur = db.cursor()
 
 async def connect() -> None:
     cur.execute("""CREATE TABLE IF NOT EXISTS bot_user(
+    u_id INTEGER NOT NULL UNIQUE,
     user_id INTEGER NOT NULL UNIQUE,
     login TEXT NOT NULL UNIQUE,
     password TEXT NULL)""")
@@ -25,3 +27,4 @@ async def user_status(user_id):
 async def delete_user(user_id) -> None:
     cur.execute("""DELETE FROM bot_user WHERE user_id=?""", (user_id,))
     db.commit()
+

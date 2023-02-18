@@ -16,8 +16,8 @@ def logout() -> InlineKeyboardMarkup:
 
 
 def confirm_logout() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton('Да', callback_data='logout')],
-        [InlineKeyboardButton('Нет', callback_data='cancel_logout')]
+    kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+        [InlineKeyboardButton('Да', callback_data='logout'),
+         InlineKeyboardButton('Нет', callback_data='cancel_logout')]
     ])
     return kb

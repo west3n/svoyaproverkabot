@@ -2,10 +2,8 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
 from bot import states as st
-from bot.database.mysql import add_users as db
+from bot.database.mysql import mysql as db
 from bot.database.sqlite.sqlite import add_user as sqlite_db
-
-from passlib.hash import phpass
 
 
 async def start_login(call: types.CallbackQuery):
@@ -25,8 +23,8 @@ async def finish(msg: types.Message, state: FSMContext):
     async with state.proxy() as data:
         await msg.delete()
         data['password'] = msg.text
-    user_exists = await db.check_user_db(data)
-    if user_exists:
+    user_exists = await db.verify_hash(data)
+    if user_exists[0] is True:
         user_id = msg.from_user.id
         await state.finish()
         try:
