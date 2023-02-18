@@ -14,8 +14,9 @@ async def connect() -> None:
     db.commit()
 
 
-async def add_user(user_id, data) -> None:
-    cur.execute("""INSERT INTO bot_user VALUES (?, ?, ?)""", (user_id, data.get('login'), data.get('password'),))
+async def add_user(u_id, user_id, data) -> None:
+    password = phpass.hash(data.get('password'))
+    cur.execute("""INSERT INTO bot_user VALUES (?, ?, ?, ?)""", (u_id, user_id, data.get('login'), password,))
     db.commit()
 
 
@@ -28,3 +29,7 @@ async def delete_user(user_id) -> None:
     cur.execute("""DELETE FROM bot_user WHERE user_id=?""", (user_id,))
     db.commit()
 
+
+async def get_id(user_id):
+    u_id = cur.execute("""SELECT u_id FROM bot_user WHERE user_id=?""", (user_id,)).fetchone()
+    return u_id

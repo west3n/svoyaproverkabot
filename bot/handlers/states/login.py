@@ -26,14 +26,15 @@ async def finish(msg: types.Message, state: FSMContext):
     user_exists = await db.verify_hash(data)
     if user_exists[0] is True:
         user_id = msg.from_user.id
+        u_id = user_exists[1]
         await state.finish()
         try:
-            await sqlite_db(user_id, data)
+            await sqlite_db(u_id, user_id, data)
             await msg.answer(text='Вход в аккаунт выполнен.\nПосмотреть профиль - /profile'
                                   '\nПроверить компанию по ОГРН - /check')
         except:
             await msg.answer(text='Вход по данному логину уже выполнен.\nИспользуйте другой - /login.')
-    else:
+    elif user_exists[0] is False:
         await state.finish()
         await msg.answer(text='Неправильный логин или пароль.\nПопробовать заново - /login')
 
