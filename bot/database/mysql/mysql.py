@@ -22,6 +22,7 @@ async def check_user_db(data):
     cursor.execute(query, values)
     result = cursor.fetchone()
     cursor.close()
+
     return result is not None
 
 
@@ -51,6 +52,7 @@ async def get_user_profile(bot_db):
     cursor.execute(profile, values)
     result = cursor.fetchone()
     cursor.close()
+
     return result
 
 
@@ -61,7 +63,7 @@ async def update_log(user_id, data, json_data):
     cursor.execute(upload, data_user)
     db.commit()
     cursor.close()
-    db.close()
+
 
 async def count_scoring(user_id):
     cursor = db.cursor()

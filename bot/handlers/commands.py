@@ -54,9 +54,11 @@ async def user_profile(msg: types.Message):
         print(display_name)
         result = await mysql.get_user_profile(bot_db[0])
         date = result[1].strftime("%d.%m.%Y")
-        await msg.answer(f"<em>Тариф:</em><b> {result[0]} </b>"
+        count = await mysql.count_scoring(bot_db[0])
+        await msg.answer(f'<em>Имя:</em><b> {display_name}</b>'
+                         f"\n<em>Тариф:</em><b> {result[0]} </b>"
                          f"\n<em>Действует до:</em> <b>{date}</b>"
-                         f"\n<em>Осталось проверок:</em> <b> {result[2] - 1}</b>",
+                         f"\n<em>Осталось проверок:</em> <b> {result[2] - count}</b>",
                          reply_markup=inline.logout())
 
 
