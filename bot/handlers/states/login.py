@@ -27,9 +27,10 @@ async def finish(msg: types.Message, state: FSMContext):
     if user_exists[0] is True:
         user_id = msg.from_user.id
         u_id = user_exists[1]
+        display_name = user_exists[2]
         await state.finish()
         try:
-            await sqlite_db(u_id, user_id, data)
+            await sqlite_db(u_id, user_id, data, display_name)
             await msg.answer(text='Вход в аккаунт выполнен.\nПосмотреть профиль - /profile'
                                   '\nПроверить компанию по ОГРН - /check')
         except:

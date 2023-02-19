@@ -8,3 +8,4 @@ class Login(StatesGroup):
 
 class CheckInn(StatesGroup):
     inn = State()
+    ogrn = State()

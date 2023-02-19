@@ -11,10 +11,7 @@ async def logout_verify(call: types.CallbackQuery):
 
 async def cancel_logout(call: types.CallbackQuery):
     await call.message.delete()
-    await call.message.answer("Тариф:"
-                              "\nДействует до:"
-                              "\nОсталось проверок:",
-                              reply_markup=inline.logout())
+    await call.message.answer('Выход отменен. Посмотреть свой профиль - /profile')
 
 
 async def logout(call: types.CallbackQuery):

@@ -21,3 +21,10 @@ def confirm_logout() -> InlineKeyboardMarkup:
          InlineKeyboardButton('Нет', callback_data='cancel_logout')]
     ])
     return kb
+
+
+def get_pdf_file() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton('Получить полный отчет в PDF-формате', callback_data='get_pdf_file')]
+    ])
+    return kb
