@@ -65,6 +65,15 @@ async def update_log(user_id, data, json_data):
     cursor.close()
 
 
+async def check_log(u_id):
+    cursor = db.cursor()
+    query = "SELECT * FROM wp_scoring WHERE user_id = %s ORDER BY date DESC"
+    cursor.execute(query, (u_id,))
+    log = cursor.fetchall()
+    cursor.close()
+    return log
+
+
 async def count_scoring(user_id):
     cursor = db.cursor()
     query = "SELECT COUNT(*) FROM wp_scoring WHERE user_id = %s " \

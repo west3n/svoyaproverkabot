@@ -1,5 +1,4 @@
 from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
 
 from bot.database.mysql import mysql
 from bot.database.sqlite import sqlite
@@ -16,7 +15,17 @@ async def bot_start(msg: types.Message):
     if not user:
         await msg.answer(text=f'Привет, {user_name}! Зайти в свой аккаунт - /login')
     else:
-        await msg.answer(text=f'Привет, {user_name}! Посмотреть свой профиль - /profile')
+        bot_db = await sqlite.get_id(user_id)
+        display_name = await sqlite.get_display_name(user_id)
+        result = await mysql.get_user_profile(bot_db[0])
+        date = result[1].strftime("%d.%m.%Y")
+        count = await mysql.count_scoring(bot_db[0])
+        await msg.answer(f"{user_name}, для начала работы с ботом отправьте ему ИНН или ОГРН организации\n\n"
+                         f'<em>Имя:</em><b> {display_name}</b>'
+                         f"\n<em>Тариф:</em><b> {result[0]} </b>"
+                         f"\n<em>Действует до:</em> <b>{date}</b>"
+                         f"\n<em>Осталось проверок:</em> <b> {result[2] - count}</b>",
+                         reply_markup=inline.logout())
 
 
 async def bot_about(msg: types.Message):
@@ -66,7 +75,4 @@ def register(dp: Dispatcher):
     dp.register_message_handler(bot_start, commands='start', state='*')
     dp.register_message_handler(bot_about, commands='about', state='*')
     dp.register_message_handler(user_login, commands='login', state='*')
-    dp.register_message_handler(user_profile, commands='profile', state='*')
-    dp.register_message_handler(check_inn, commands='check', state='*')
-    dp.register_message_handler(check_result, state=st.CheckInn.inn)
-    dp.register_callback_query_handler(create_pdf, text='get_pdf_file', state=st.CheckInn.inn)
+    dp.register_message_handler(history, commands='history')
