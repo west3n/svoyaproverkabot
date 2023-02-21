@@ -28,3 +28,10 @@ def get_pdf_file() -> InlineKeyboardMarkup:
         [InlineKeyboardButton('Получить полный отчет в PDF-формате', callback_data='get_pdf_file')]
     ])
     return kb
+
+
+def get_pdf_file_txt() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton('Получить полный отчет в PDF-формате', callback_data='get_pdf_file_txt')]
+    ])
+    return kb

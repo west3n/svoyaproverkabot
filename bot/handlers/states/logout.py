@@ -11,12 +11,12 @@ async def logout_verify(call: types.CallbackQuery):
 
 async def cancel_logout(call: types.CallbackQuery):
     await call.message.delete()
-    await call.message.answer('Выход отменен. Посмотреть свой профиль - /profile')
+    await call.message.answer("Выход отменен")
 
 
 async def logout(call: types.CallbackQuery):
     await call.message.delete()
-    await call.message.answer(text='Вы вышли из аккаунта. Возвращайтесь скорее!')
+    await call.message.answer('Вы вышли из аккаунта. Возвращайтесь скорее!')
     user_id = call.from_user.id
     await sqlite.delete_user(user_id)
 

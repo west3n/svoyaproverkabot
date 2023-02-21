@@ -67,7 +67,8 @@ async def update_log(user_id, data, json_data):
 
 async def count_scoring(user_id):
     cursor = db.cursor()
-    query = "SELECT COUNT(*) FROM wp_scoring WHERE user_id = %s"
+    query = "SELECT COUNT(*) FROM wp_scoring WHERE user_id = %s " \
+            "AND YEAR(date) = YEAR(CURRENT_DATE()) AND MONTH(date) = MONTH(CURRENT_DATE())"
     cursor.execute(query, (user_id,))
     count = cursor.fetchone()[0]
     cursor.close()

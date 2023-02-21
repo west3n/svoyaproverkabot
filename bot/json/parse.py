@@ -44,8 +44,39 @@ def json_parse(inn):
             address = data["ФНС"]["items"][0]["ЮЛ"]["Адрес"]["АдресПолн"]
         except:
             address = 'Нет данных'
+        try:
+            balance = str(data["Отчетность"]['2021']['1600']) + " руб."
+        except:
+            balance = 'Нет данных'
+        try:
+            income = str(data["Отчетность"]['2021']['2110']) + " руб."
+        except:
+            income = 'Нет данных'
+        try:
+            profit = str(data["Отчетность"]['2021']['2400']) + " руб."
+        except:
+            profit = 'Нет данных'
+        try:
+            usn_osno = data["ФНС"]["items"][0]["ЮЛ"]["ОткрСведения"]["СведСНР"]
+        except:
+            usn_osno = "Нет данных"
+        try:
+            workers_amount = data["ФНС"]["items"][0]["ЮЛ"]["ОткрСведения"]["КолРаб"]
+        except:
+            workers_amount = "Нет данных"
 
-        return short_name, inn, ogrn, director, contacts, authorized_capital, okved, date_open, address, data
+        lic_org_list = []
+        try:
+            for lic in data["ФНС"]["items"][0]["ЮЛ"]["Лицензии"]:
+                lic_org_list.append(lic["ЛицОрг"])
+        except:
+            lic_org_list = ['Нет лицензий']
+
+        lic_org_str = "\n".join(lic_org_list)
+
+        return [short_name, inn, ogrn, director, contacts,
+                authorized_capital, okved, date_open, address, balance,
+                income, profit, usn_osno, workers_amount, lic_org_str, data]
 
     elif str(data)[:25] == "{'ФНС': {'items': [{'ИП':":
         try:
@@ -92,24 +123,33 @@ def check_text(info):
             capital = format_number(float(info[5]))
         except:
             capital = 'Нет данных'
-        output = ""
-        for contact in info[4]:
-            try:
-                output += f"<em>{contact}:</em> <b>{','.join(info[4][contact])}</b>\n\n"
-            except:
-                output = 'Нет данных'
+        if str(info[4]) != "[]":
 
-            text = (f'<em>Краткое наименование:</em> <b> {info[0]} </b> \n\n'
-                    f'<em>ИНН:</em> <b>{info[1]}</b>\n\n'
-                    f'<em>ОГРН:</em><b> {info[2]}</b>\n\n'
-                    f'<em>Руководитель организации:</em> <b>{info[3]}</b>\n\n'
-                    f'{output}'
-                    f'<em>Уставной капитал:</em> <b>{capital}</b>\n\n'
-                    f'<em>Основной вид деятельности:</em> <b>{info[6]}</b>\n\n'
-                    f'<em>Дата регистрации:</em> <b>{info[7]}</b>\n\n'
-                    f'<em>Юридический адрес:</em> <b> {info[8]}</b>')
+            output = ""
+            for contact in info[4]:
+                output += f"<em>{contact}:</em> <b>{','.join(info[4][contact])}</b>\n"
 
-            return text
+        else:
+            output = '<em>Контакты:</em><b> Нет данных</b>\n'
+        text = (f'<em>Краткое наименование:</em> <b> {info[0]} </b> \n'
+                f'<em>ИНН:</em> <b>{info[1]}</b>\n'
+                f'<em>ОГРН:</em><b> {info[2]}</b>\n'
+                f'<em>Руководитель организации:</em> <b>{info[3]}</b>\n'
+                f'{output}'
+                f'<em>Уставной капитал:</em> <b>{capital}</b>\n'
+                f'<em>Основной вид деятельности:</em> <b>{info[6]}</b>\n'
+                f'<em>Дата регистрации:</em> <b>{info[7]}</b>\n'
+                f'<em>Юридический адрес:</em> <b> {info[8]}</b>\n'
+                f'<em>Баланс</em>: <b>{info[9]}</b>\n'
+                f'<em>Выручка:</em> <b>{info[10]}</b>\n'
+                f'<em>Чистая прибыль</em>: <b>{info[11]}</b>\n'
+                f'<em>УСН/ОСНО:</em> <b>{info[12]}</b>\n'
+                f'<em>Количество сотрудников:</em> <b>{info[13]}</b>\n'
+                f'<em>Госзакупки: </em>\n'
+                f'<em>Лицензии:</em> <b>{info[14]}</b>\n'
+                f'<em>Арбитраж: </em>\n'
+                f'<em>ФССП: </em>')
+        return text
     else:
         text = (f'<em>ФИО:</em> <b> {info[0]} </b> \n\n'
                 f'<em>Статус:</em> <b> {info[1]} </b> \n\n'
