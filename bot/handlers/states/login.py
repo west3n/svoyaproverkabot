@@ -3,13 +3,21 @@ from aiogram.dispatcher import FSMContext
 
 from bot import states as st
 from bot.database.mysql import mysql as db
-from bot.database.sqlite.sqlite import add_user as sqlite_db
+from bot.database.sqlite import sqlite
+from bot.keyboards import inline
+from bot.keyboards import reply
 
 
 async def start_login(call: types.CallbackQuery):
-    await call.message.delete()
-    await call.message.answer(text='Введи свой логин:')
-    await st.Login.login.set()
+    await call.message.edit_reply_markup()
+    user_id = call.from_user.id
+    user = await sqlite.user_status(user_id)
+    if not user:
+        await call.message.answer(text='Введи свой логин:',
+                                  reply_markup=reply.cmd_cancel())
+        await st.Login.login.set()
+    else:
+        await call.message.answer('Вы уже вошли в аккаунт!')
 
 
 async def save_login(msg: types.Message, state: FSMContext):
@@ -30,14 +38,42 @@ async def finish(msg: types.Message, state: FSMContext):
         display_name = user_exists[2]
         await state.finish()
         try:
-            await sqlite_db(u_id, user_id, data, display_name)
-            await msg.answer(text='Вход в аккаунт выполнен.\nПосмотреть профиль - /profile'
-                                  '\nПроверить компанию по ОГРН - /check')
+            await sqlite.add_user(u_id, user_id, data, display_name)
+            await asyncio.sleep(3)
+            test = await profile(user_id)
+            await msg.answer(f"\n<b>Ваш профиль:</b>"
+                             f'\n✅<em>Добро пожаловать, <b>{test[0]}!</b></em>'
+                             f"\n🌐<em>Ваш тариф:</em><b> {test[1]} </b>"
+                             f"\n📅<em>Действует до:</em> <b>{test[2]}</b>"
+                             f"\n📝<em>Осталось проверок:</em> <b>{test[3]}</b>\n\n",
+                             reply_markup=inline.logout())
+            await msg.answer(f"📑 Чтобы проверить организацию введите ИНН или ОГРН организации")
         except:
             await msg.answer(text='Вход по данному логину уже выполнен.\nИспользуйте другой - /login.')
     elif user_exists[0] is False:
         await state.finish()
-        await msg.answer(text='Неправильный логин или пароль.\nПопробовать заново - /login')
+        await msg.answer(text=f'Неправильный логин или пароль.\n'
+                              f'Попробовать заново - /start\n\n'
+                              f'Забыли пароль? <a href= "https://svoya-proverka.ru/password-reset/">'
+                              f'Сброс пароля</a>')
+
+
+async def cmd_cancel(msg: types.Message, state: FSMContext):
+    await msg.answer(text='Вы отменили действие!',
+                     reply_markup=reply.remove)
+    await state.finish()
+
+
+async def profile(user_id):
+    bot_db = await sqlite.get_id(user_id)
+    display_name = await sqlite.get_display_name(user_id)
+    result = await db.get_user_profile(bot_db[0])
+    tarif = result[0]
+    date = result[1].strftime("%d.%m.%Y")
+    col = result[2]
+    count = await db.count_scoring(bot_db[0])
+    test = col - count
+    return display_name, tarif, date, test
 
 
 def register(dp: Dispatcher):

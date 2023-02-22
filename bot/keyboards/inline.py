@@ -1,13 +1,6 @@
 from aiogram.types.inline_keyboard import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-def login() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton('Зайти в свой аккаунт', callback_data='login')]
-    ])
-    return kb
-
-
 def logout() -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton('Выйти из аккаунта', callback_data='logout_verify')]
@@ -23,15 +16,10 @@ def confirm_logout() -> InlineKeyboardMarkup:
     return kb
 
 
-def get_pdf_file() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton('Получить полный отчет в PDF-формате', callback_data='get_pdf_file')]
+def login() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+        [InlineKeyboardButton('Вход', callback_data='login'),
+         InlineKeyboardButton('Регистрация', url='https://svoya-proverka.ru/register/')]
     ])
-    return kb
 
-
-def get_pdf_file_txt() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton('Получить полный отчет в PDF-формате', callback_data='get_pdf_file_txt')]
-    ])
     return kb

@@ -12,10 +12,10 @@ async def check_result(msg: types.Message):
     user_id = msg.from_user.id
     user = await sqlite.user_status(user_id)
     if not user:
-        await msg.answer("Чтобы пользоваться ботом, вы должны выполнить вход - /login")
+        await msg.answer("Чтобы пользоваться ботом, вы должны выполнить вход - /start")
     else:
         test = msg.text
-        if test.isdigit() and len(test) <= 12:
+        if test.isdigit() and 8 <= len(test) <= 15:
             try:
                 await msg.answer(text='Бот начал сбор данных, это может занять '
                                       'от 20 секунд до 3х минут, пожалуйста, ожидайте.')
@@ -24,10 +24,7 @@ async def check_result(msg: types.Message):
                                       "в котором будет находиться вся подробная информация.")
                 inn = msg.text
                 info = parse.json_parse(inn)
-                if info[9]:
-                    json_data = info[15]
-                else:
-                    json_data = info[6]
+                json_data = info[18]
                 user_id = msg.from_user.id
                 u_id = await sqlite.get_id(user_id)
                 text = parse.check_text(info)
@@ -39,7 +36,7 @@ async def check_result(msg: types.Message):
                 await msg.answer(text='По введенным данным нет информации, попробуйте ввести другие')
         else:
             await msg.answer(text='Неверный формат сообщения. Введите ИНН или ОГРН, '
-                                  'используя только цифры (12 цифр максимум).')
+                                  'используя только цифры (15 цифр максимум).')
 
 
 async def create_pdf(msg: types.Message, inn: str):
@@ -54,6 +51,8 @@ async def create_pdf(msg: types.Message, inn: str):
         file_bytes = io.BytesIO(f.read())
         input_file = types.InputFile(file_bytes, f"Полный отчет_{inn}.pdf")
     await msg.bot.send_document(msg.from_user.id, document=input_file)
+    await asyncio.sleep(4)
+    await msg.answer("Чтобы проверить следующий ИНН/ОГРН, просто отправьте его в чат")
 
 
 def register(dp: Dispatcher):
