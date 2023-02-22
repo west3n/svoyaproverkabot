@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
@@ -23,7 +25,8 @@ async def start_login(call: types.CallbackQuery):
 async def save_login(msg: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['login'] = msg.text
-    await msg.answer(text='Введи свой пароль:')
+    await msg.answer(text='Введи свой пароль:',
+                     reply_markup=reply.remove)
     await st.Login.next()
 
 
@@ -49,7 +52,7 @@ async def finish(msg: types.Message, state: FSMContext):
                              reply_markup=inline.logout())
             await msg.answer(f"📑 Чтобы проверить организацию введите ИНН или ОГРН организации")
         except:
-            await msg.answer(text='Вход по данному логину уже выполнен.\nИспользуйте другой - /login.')
+            await msg.answer(text='Вход по данному логину уже выполнен.\nИспользуйте другой - /start.')
     elif user_exists[0] is False:
         await state.finish()
         await msg.answer(text=f'Неправильный логин или пароль.\n'
@@ -78,5 +81,6 @@ async def profile(user_id):
 
 def register(dp: Dispatcher):
     dp.register_callback_query_handler(start_login, text='login')
+    dp.register_message_handler(cmd_cancel, text='Отмена', state="*")
     dp.register_message_handler(save_login, content_types=['text'], state=st.Login.login)
     dp.register_message_handler(finish, content_types=['text'], state=st.Login.password)

@@ -55,7 +55,7 @@ async def history(msg: types.Message):
             'личном кабинете</b>')
     else:
         await msg.answer(f'Вы не вошли в профиль!\n'
-                         f'Для входа используйте /login')
+                         f'Для входа используйте /start')
 
 
 def register(dp: Dispatcher):
