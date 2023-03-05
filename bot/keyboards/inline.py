@@ -23,3 +23,17 @@ def login() -> InlineKeyboardMarkup:
     ])
 
     return kb
+
+
+def sup() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+         [InlineKeyboardButton('Отмена', callback_data='sup_no')]
+    ])
+    return kb
+
+
+def sup_answer(user_name) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+         [InlineKeyboardButton('Ответить', url=f'https://t.me/{user_name}', callback_data='sup_1')]
+    ])
+    return kb

@@ -254,6 +254,16 @@ def format_number_2(num: float):
         return result.replace(', ', ' ')
 
 
+def format_lights(info: float):
+    if info <= 33:
+        info = f'🟢 {info}%'
+    elif info >= 66:
+        info = f'🔴 {info}%'
+    else:
+        info = f'🟡 {info}%'
+    return info
+
+
 def check_text(info):
     if info[9]:
         try:
@@ -302,4 +312,5 @@ def check_text(info):
                 f'├<em>Платежеспособность:</em> <b>{format_lights(float(info[30]))}</b>\n'
                 f'├<em>ФЗ-115:</em> <b>{format_lights(float(info[31]))}</b>\n'
                 f'├<b><a href="https://svoya-proverka.ru/scoring/?ogrn={info[1]}">Здесь </a>ссылка на полную версию на сайте</b>')
+
         return text

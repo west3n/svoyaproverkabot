@@ -1,5 +1,5 @@
 import asyncio
-
+import mysql.connector
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
@@ -52,7 +52,15 @@ async def finish(msg: types.Message, state: FSMContext):
                              f"\n📝<em>Осталось проверок:</em> <b>{test[3]}</b>\n\n",
                              reply_markup=inline.logout())
             await msg.answer(f"📑 Чтобы проверить организацию введите ИНН или ОГРН организации")
-        except:
+        except mysql.connector.errors.InternalError:
+            await msg.answer(f"\n<b>Ваш профиль:</b>"
+                             f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>\n\n'
+                             f'У вас нет оформленной подписки!', reply_markup=inline.logout())
+        except TypeError:
+            await msg.answer(f"\n<b>Ваш профиль:</b>"
+                             f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>\n\n'
+                             f'У вас нет оформленной подписки!', reply_markup=inline.logout())
+        except IntegrityError:
             await msg.answer(text='Вход по данному логину уже выполнен.\nИспользуйте другой - /start.')
     elif user_exists[0] is False:
         await state.finish()
