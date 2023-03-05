@@ -1,5 +1,6 @@
 from aiogram import Dispatcher, types
-
+from aiogram.dispatcher import FSMContext
+from bot import config
 from bot.database.mysql import mysql
 from bot.database.sqlite import sqlite
 from bot.keyboards import inline
@@ -8,25 +9,37 @@ import json
 
 
 async def bot_start(msg: types.Message):
-    user_name = msg.from_user.first_name
-    user_id = msg.from_user.id
-    user = await sqlite.user_status(user_id)
-    if not user:
-        await msg.answer(text=f'Привет, {user_name}! Вы не вошли в аккаунт!',
-                         reply_markup=inline.login())
-    else:
-        bot_db = await sqlite.get_id(user_id)
-        display_name = await sqlite.get_display_name(user_id)
-        result = await mysql.get_user_profile(bot_db[0])
-        date = result[1].strftime("%d.%m.%Y")
-        count = await mysql.count_scoring(bot_db[0])
-        await msg.answer(f"\n<b>Ваш профиль:</b>"
-                         f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>'
-                         f"\n🌐<em>Ваш тариф:</em><b> {result[0]} </b>"
-                         f"\n📅<em>Действует до:</em> <b>{date}</b>"
-                         f"\n📝<em>Осталось проверок:</em><b> {result[2] - count}</b>\n\n",
-                         reply_markup=inline.logout())
-        await msg.answer(f"📑 Чтобы проверить организацию введите ИНН или ОГРН организации")
+    if msg.chat.type == 'private':
+        user_name = msg.from_user.first_name
+        user_id = msg.from_user.id
+        user = await sqlite.user_status(user_id)
+        if not user:
+            await msg.answer(text=f'Привет, {user_name}! Вы не вошли в аккаунт!',
+                             reply_markup=inline.login())
+        else:
+            try:
+                bot_db = await sqlite.get_id(user_id)
+                display_name = await sqlite.get_display_name(user_id)
+                result = await mysql.get_user_profile(bot_db[0])
+                date = result[1].strftime("%d.%m.%Y")
+                count = await mysql.count_scoring(bot_db[0])
+                await msg.answer(f"\n<b>Ваш профиль:</b>"
+                                 f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>'
+                                 f"\n🌐<em>Ваш тариф:</em><b> {result[0]} </b>"
+                                 f"\n📅<em>Действует до:</em> <b>{date}</b>"
+                                 f"\n📝<em>Осталось проверок:</em><b> {result[2] - count}</b>\n\n",
+                                 reply_markup=inline.logout())
+                await msg.answer(f"📑 Чтобы проверить организацию, введите её ИНН или ОГРН:")
+            except TypeError:
+                display_name = await sqlite.get_display_name(user_id)
+                await msg.answer(f"\n<b>Ваш профиль:</b>"
+                                 f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>\n\n'
+                                 f'У вас нет оформленной подписки!', reply_markup=inline.logout())
+            except InternalError:
+                display_name = await sqlite.get_display_name(user_id)
+                await msg.answer(f"\n<b>Ваш профиль:</b>"
+                                 f'\n✅<em>Добро пожаловать, <b>{display_name}!</b></em>\n\n'
+                                 f'У вас нет оформленной подписки!', reply_markup=inline.logout())
 
 
 async def history(msg: types.Message):

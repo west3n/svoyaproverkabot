@@ -8,6 +8,7 @@ from bot.database.mysql import mysql as db
 from bot.database.sqlite import sqlite
 from bot.keyboards import inline
 from bot.keyboards import reply
+from sqlite3 import IntegrityError
 
 
 async def start_login(call: types.CallbackQuery):

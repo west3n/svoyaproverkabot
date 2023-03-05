@@ -83,3 +83,41 @@ async def count_scoring(user_id):
     cursor.close()
 
     return count
+
+
+async def get_user_email_full_name(u_id):
+    try:
+        cursor = db.cursor()
+        query = f"SELECT user_email, display_name FROM wp_users WHERE ID = %s"
+        cursor.execute(query, (u_id,))
+        values = cursor.fetchone()
+        cursor.close()
+        return values
+    except:
+        return None
+
+
+async def get_user_phone(u_id):
+    try:
+        cursor = db.cursor()
+        query = "SELECT DISTINCT meta_value FROM wp_usermeta WHERE user_id = %s " \
+                "AND meta_key IN ('phone_number')"
+        cursor.execute(query, (u_id,))
+        values = cursor.fetchone()
+        cursor.close()
+        return values
+    except:
+        return None
+
+
+async def get_user_org(u_id):
+    try:
+        cursor = db.cursor()
+        query = "SELECT DISTINCT meta_value FROM wp_usermeta WHERE user_id = %s " \
+                "AND meta_key IN ('org_name')"
+        cursor.execute(query, (u_id,))
+        values = cursor.fetchone()
+        cursor.close()
+        return values
+    except:
+        return None

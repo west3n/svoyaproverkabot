@@ -3,6 +3,7 @@ import json
 import locale
 from collections import Counter
 
+
 def json_parse(inn):
     url = f'https://api.damia.ru/spk/report?req={inn}&sections=fns,bals,checks,rels,isps,arbs,zakupki,scoring&format=' \
           'json&key=515ef887d6b2f0008dc4a7e96d8158671a961f27'
@@ -11,7 +12,7 @@ def json_parse(inn):
     if str(data)[:25] == "{'ФНС': {'items': [{'ЮЛ':":
         try:
             short_name = data["ФНС"]["items"][0]["ЮЛ"]["НаимСокрЮЛ"]
-        except :
+        except:
             short_name = 'Нет данных'
         try:
             inn = data["ФНС"]["items"][0]["ЮЛ"]["ИНН"]
@@ -25,6 +26,19 @@ def json_parse(inn):
             director = data["ФНС"]["items"][0]["ЮЛ"]["Руководитель"]["ФИОПолн"]
         except:
             director = 'Нет данных'
+        founders = []
+        for item in data.get("ФНС", {}).get("items", []):
+            for founder in item.get("ЮЛ", {}).get("Учредители", []):
+                if "УчрФЛ" in founder:
+                    founders.append(founder["УчрФЛ"].get("ФИОПолн"))
+                elif "УчрЮЛ" in founder:
+                    founders.append(founder["УчрЮЛ"].get("НаимСокрЮЛ"))
+
+        founders = [founder for founder in founders if founder is not None]
+        if not founders:
+            founders_str = "Нет данных"
+        else:
+            founders_str = ", ".join(founders)
         try:
             contacts = data["ФНС"]["items"][0]["ЮЛ"]["Контакты"]
         except:
@@ -46,24 +60,47 @@ def json_parse(inn):
         except:
             address = 'Нет данных'
         try:
-            balance = data["Отчетность"]['2021']['1600']
-            edit_balance = format_number_2(balance)
+            balance_2021 = format(data["Отчетность"]['2021']['1600'], ',').replace(',', ' ')
         except:
-            edit_balance = 'Нет данных'
+            balance_2021 = 'Нет данных'
         try:
-            income = data["Отчетность"]['2021']['2110']
-            edit_income = format_number_2(income)
+            balance_2020 = format(data["Отчетность"]['2020']['1600'], ',').replace(',', ' ')
         except:
-            edit_income = 'Нет данных'
+            balance_2020 = 'Нет данных'
         try:
-            profit = data["Отчетность"]['2021']['2400']
-            edit_profit = format_number_2(profit)
+            balance_2019 = format(data["Отчетность"]['2019']['1600'], ',').replace(',', ' ')
         except:
-            edit_profit = 'Нет данных'
+            balance_2019 = 'Нет данных'
+        try:
+            income_2021 = format(data["Отчетность"]['2021']['2110'], ',').replace(',', ' ')
+        except:
+            income_2021 = 'Нет данных'
+        try:
+            income_2020 = format(data["Отчетность"]['2020']['2110'], ',').replace(',', ' ')
+        except:
+            income_2020 = 'Нет данных'
+        try:
+            income_2019 = format(data["Отчетность"]['2019']['2110'], ',').replace(',', ' ')
+        except:
+            income_2019 = 'Нет данных'
+        try:
+            profit_2021 = format(data["Отчетность"]['2021']['2400'], ',').replace(',', ' ')
+        except:
+            profit_2021 = 'Нет данных'
+        try:
+            profit_2020 = format(data["Отчетность"]['2020']['2400'], ',').replace(',', ' ')
+        except:
+            profit_2020 = 'Нет данных'
+        try:
+            profit_2019 = format(data["Отчетность"]['2019']['2400'], ',').replace(',', ' ')
+        except:
+            profit_2019 = 'Нет данных'
         try:
             usn_osno = data["ФНС"]["items"][0]["ЮЛ"]["ОткрСведения"]["СведСНР"]
+            if usn_osno == "Нет":
+                usn_osno = "ОСНО"
         except:
-            usn_osno = "Нет данных"
+            usn_osno = "ОСНО"
         try:
             workers_amount = data["ФНС"]["items"][0]["ЮЛ"]["ОткрСведения"]["КолРаб"]
         except:
@@ -79,22 +116,33 @@ def json_parse(inn):
                 if "Закупка завершена" in data["Закупки"]["Сводка"]["44_223"]["Закупки"][year]:
                     for item in data["Закупки"]["Сводка"]["44_223"]["Закупки"][year]["Закупка завершена"]["Цена"]:
                         purchase_amount += item["Количество"]
-            contracts_sum = 0
+            contracts1_sum = 0
             for year in data["Закупки"]["Сводка"]["44_223"]["Контракты"]:
                 if "Исполнение завершено" in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]:
                     for item in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]["Исполнение завершено"]["Цена"]:
-                        contracts_sum += item["Сумма"]
-            contracts_amount = 0
+                        contracts1_sum += item["Сумма"]
+            contracts1_amount = 0
             for year in data["Закупки"]["Сводка"]["44_223"]["Контракты"]:
                 if "Исполнение завершено" in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]:
                     for item in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]["Исполнение завершено"]["Цена"]:
-                        contracts_amount += item["Количество"]
-            total_sum = format_number(purchase_sum + contracts_sum)
-            total_amount = purchase_amount + contracts_amount
+                        contracts1_amount += item["Количество"]
+            contracts2_sum = 0
+            for year in data["Закупки"]["Сводка"]["44_223"]["Контракты"]:
+                if "Исполнение прекращено" in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]:
+                    for item in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]["Исполнение прекращено"]["Цена"]:
+                        contracts2_sum += item["Сумма"]
+            contracts2_amount = 0
+            for year in data["Закупки"]["Сводка"]["44_223"]["Контракты"]:
+                if "Исполнение прекращено" in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]:
+                    for item in data["Закупки"]["Сводка"]["44_223"]["Контракты"][year]["Исполнение прекращено"]["Цена"]:
+                        contracts2_amount += item["Количество"]
+
+            total_sum = format_number(purchase_sum + contracts1_sum + contracts2_sum)
+            total_amount = purchase_amount + contracts1_amount + contracts2_amount
             if total_sum and total_amount == 0:
                 gos_zak = "Нет госзакупок"
             else:
-                gos_zak = f"Участник - {total_sum} ({total_amount}) | Контракт заключен - {format_number(contracts_sum)} ({contracts_amount})"
+                gos_zak = f"Участник - {total_sum} ({total_amount}) | Контракт заключен - {format_number(contracts1_sum + contracts2_sum)} ({contracts1_amount + contracts2_amount})"
         except:
             gos_zak = "Нет госзакупок"
         lic_org_list = []
@@ -135,9 +183,46 @@ def json_parse(inn):
                 account_block = 'Да'
         except:
             account_block = "Нет"
+        try:
+            arbitration_claimant_amount = 0
+            for year in data["Арбитражи"]["Сводка"]["Истец"]:
+                arbitration_claimant_amount += data["Арбитражи"]["Сводка"]["Истец"][year]["Итого"]["Количество"]
+        except:
+            arbitration_claimant_amount = "Нет данных"
+        try:
+            arbitration_claimant_sum = 0
+            for year in data["Арбитражи"]["Сводка"]["Истец"]:
+                arbitration_claimant_sum += data["Арбитражи"]["Сводка"]["Истец"][year]["Итого"]["Сумма"]
+        except:
+            arbitration_claimant_sum = "Нет данных"
+        try:
+            arbitration_defendant_amount = 0
+            for year in data["Арбитражи"]["Сводка"]["Ответчик"]:
+                arbitration_defendant_amount += data["Арбитражи"]["Сводка"]["Ответчик"][year]["Итого"]["Количество"]
+        except:
+            arbitration_defendant_amount = "Нет данных"
+        try:
+            arbitration_defendant_sum = 0
+            for year in data["Арбитражи"]["Сводка"]["Ответчик"]:
+                arbitration_defendant_sum += data["Арбитражи"]["Сводка"]["Ответчик"][year]["Итого"]["Сумма"]
+        except:
+            arbitration_defendant_sum = "Нет данных"
+        try:
+            bankruptcy = '{:.3}'.format(data["Скоринг"]["Риски"]["РискБанкр"]["2021"]["РискЗнач"] * 100)
+            solvency = '{:.3}'.format(data["Скоринг"]["Риски"]["РискПроблемнКред"]["2021"]["РискЗнач"] * 100)
+            fz115 = '{:.3}'.format(data["Скоринг"]["Риски"]["Риск115ФЗ"]["2021"]["РискЗнач"] * 100)
+
+        except:
+            bankruptcy = "Нет данных"
+            solvency = "Нет данных"
+            fz115 = "Нет данных"
+
         return [short_name, inn, ogrn, director, contacts,
-                authorized_capital, okved, date_open, address, edit_balance,
-                edit_income, edit_profit, usn_osno, workers_amount, gos_zak, lic_org_str, fssp, account_block, data]
+                authorized_capital, okved, date_open, address, balance_2021, balance_2020, balance_2019,
+                income_2021, income_2020, income_2019, profit_2021, profit_2020, profit_2019, usn_osno, workers_amount,
+                gos_zak, lic_org_str, fssp, account_block, data, format_number(arbitration_defendant_sum),
+                arbitration_defendant_amount, format_number(arbitration_claimant_sum), arbitration_claimant_amount,
+                bankruptcy, solvency, fz115, founders_str]
 
 
 def format_number(num: float):
@@ -187,20 +272,34 @@ def check_text(info):
                 f'├<em>ИНН:</em> <b>{info[1]}</b>\n'
                 f'├<em>ОГРН:</em><b> {info[2]}</b>\n'
                 f'├<em>Руководитель организации:</em> <b>{info[3]}</b>\n'
+                f'├<em>Учредители: </em><b>{info[32]}</b>\n'
                 f'{output}'
                 f'├<em>Уставной капитал:</em> <b>{capital}</b>\n'
                 f'├<em>Основной вид деятельности:</em> <b>{info[6]}</b>\n'
                 f'├<em>Дата регистрации:</em> <b>{info[7]}</b>\n'
                 f'├<em>Юридический адрес:</em> <b> {info[8]}</b>\n'
+                f'├<b>2021 (тыс.руб)</b>:\n'
                 f'├<em>Баланс</em>: <b>{info[9]}</b>\n'
-                f'├<em>Выручка:</em> <b>{info[10]}</b>\n'
-                f'├<em>Чистая прибыль</em>: <b>{info[11]}</b>\n'
-                f'├<em>УСН/ОСНО:</em> <b>{info[12]}</b>\n'
-                f'├<em>Количество сотрудников:</em> <b>{info[13]}</b>\n'
-                f'├<em>Госзакупки:</em> <b>{info[14]} </b>\n'
-                f'├<em>Лицензии:</em> <b>{info[15]}</b>\n'
-                f'├<em>Арбитражи: </em>\n'
-                f'├<em>Блокировка счетов: </em> <b>{info[17]}</b>\n'
-                f'├<em>ФССП:</em> <b>{info[16]}</b>\n'
+                f'├<em>Выручка:</em> <b>{info[12]}</b>\n'
+                f'├<em>Чистая прибыль</em>: <b>{info[15]}</b>\n'
+                f'├<b>2020 (тыс.руб)</b>:\n'
+                f'├<em>Баланс</em>: <b>{info[10]}</b>\n'
+                f'├<em>Выручка:</em> <b>{info[13]}</b>\n'
+                f'├<em>Чистая прибыль</em>: <b>{info[16]}</b>\n'
+                f'├<b>2019 (тыс.руб)</b>:\n'
+                f'├<em>Баланс</em>: <b>{info[11]}</b>\n'
+                f'├<em>Выручка:</em> <b>{info[14]}</b>\n'
+                f'├<em>Чистая прибыль</em>: <b>{info[17]}</b>\n'
+                f'├<em>Налоговый режим:</em> <b>{info[18]}</b>\n'
+                f'├<em>Количество сотрудников:</em> <b>{info[19]}</b>\n'
+                f'├<em>Госзакупки:</em> <b>{info[20]} </b>\n'
+                f'├<em>Лицензии:</em> <b>{info[21]}</b>\n'
+                f'├<em>Арбитражи:</em> <b>Ответчик - {info[25]} ({info[26]}) | Истец - {info[27]} ({info[28]})</b>\n'
+                f'├<em>Блокировка счетов:</em> <b>{info[23]}</b>\n'
+                f'├<em>ФССП:</em> <b>{info[22]}</b>\n'
+                f'├<b>Скоринг:</b>\n'
+                f'├<em>Банкротство:</em> <b>{format_lights(float(info[29]))}</b>\n'
+                f'├<em>Платежеспособность:</em> <b>{format_lights(float(info[30]))}</b>\n'
+                f'├<em>ФЗ-115:</em> <b>{format_lights(float(info[31]))}</b>\n'
                 f'├<b><a href="https://svoya-proverka.ru/scoring/?ogrn={info[1]}">Здесь </a>ссылка на полную версию на сайте</b>')
         return text

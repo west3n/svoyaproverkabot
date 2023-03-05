@@ -10,11 +10,13 @@ from bot.handlers.text_content import register as reg_text_content
 
 bot_token = config('BOT_TOKEN')
 logger = logging.getLogger(__name__)
+group_id = config("GROUP_ID")
 
 
 async def set_default_commands(dp):
     await dp.bot.set_my_commands([
         types.BotCommand("start", "Начало работы с ботом"),
+        types.BotCommand("help", "Связь с технической поддержкой"),
         types.BotCommand("history", "Последние пять проверок")
     ])
 
