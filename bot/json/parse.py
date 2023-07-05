@@ -238,9 +238,9 @@ def json_parse(inn):
         try:
             rnp = data["РНП"]['Текст']
             if rnp == 'Найдены записи в РНП':
-                rnp_str = f'├❌ <em>РНП:</em> <b>{rnp}</b>'
+                rnp_str = f'├❌ <em>РНП:</em> <b>Найдены записи</b>'
             else:
-                rnp_str = f'├✅ <em>РНП:</em> <b>{rnp}</b>'
+                rnp_str = f'├✅ <em>РНП:</em> <b>Отсутствует</b>'
         except(KeyError, TypeError):
             rnp_str = '├<em>РНП:</em> <b>Нет данных</b>'
         return [short_name, inn, ogrn, director, contacts,
@@ -405,9 +405,9 @@ def json_parse(inn):
         try:
             rnp = data["РНП"]['Текст']
             if rnp == 'Найдены записи в РНП':
-                rnp_str = f'├❌ <em>РНП:</em> <b>{rnp}</b>'
+                rnp_str = f'├❌ <em>РНП:</em> <b>Найдены записи</b>'
             else:
-                rnp_str = f'├✅ <em>РНП:</em> <b>{rnp}</b>'
+                rnp_str = f'├✅ <em>РНП:</em> <b>Отсутствует</b>'
         except(KeyError, TypeError):
             rnp_str = '├<em>РНП:</em> <b>Нет данных</b>'
         return [data, short_name, inn, ogrn, contacts, okved, date_open, address, gos_zak, lic_org_str,
@@ -546,7 +546,7 @@ def check_text(info):
                 f'{info[33]}\n'
                 f'{info[35]}\n'
                 f'{info[34]}\n'
-                f'├<em>Жалобы:</em> <b>{count}</b>\n'
+                f'├<em>Жалобы в ФАС:</em> <b>{count}</b>\n'
                 f'├<b>Скоринг:</b>\n'
                 f'├<em>Банкротство:</em> <b>{info[29]}</b>\n'
                 f'├<em>Платежеспособность:</em> <b>{info[30]}</b>\n'
@@ -604,7 +604,7 @@ def check_text_2(info):
             f'{info[16]}\n'
             f'{info[18]}\n'
             f'{info[17]}\n'
-            f'├Жалобы: {count}\n'
+            f'├Жалобы в ФАС: <b>{count}</b>\n'
             f'├<b><a href="https://svoya-proverka.ru/scoring/?ogrn={info[3]}">'
             f'Здесь </a>ссылка на полную версию на сайте</b>')
     return text
