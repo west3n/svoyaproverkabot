@@ -60,15 +60,18 @@ async def history(msg: types.Message):
                     date = log[2]
                     ogrn = log[3]
                     org_json = json.loads(log[4])
-                    org_name = org_json["ФНС"]["items"][0]["ЮЛ"]["НаимСокрЮЛ"]
+                    try:
+                        org_name = org_json["ФНС"]["items"][0]["ЮЛ"]["НаимСокрЮЛ"]
+                    except KeyError:
+                        org_name = org_json["ФНС"]["items"][0]["ИП"]["ФИОПолн"]
                     counter += 1
                     await msg.answer(text=f'<em>Дата проверки</em>: <b>{date.strftime("%d.%m.%Y")}</b>\n'
                                           f'<em>ИНН/ОГРН:</em><b><a href="'
                                           f'https://svoya-proverka.ru/scoring/?ogrn={ogrn}"> {ogrn}</a></b>\n'
                                           f'<em>Организация:</em> <b>{org_name}</b>')
                 await msg.answer(
-                    '<b>Полную историю вы можете посмотреть <a href="https://svoya-proverka.ru/cabinet/">на сайте</a> в '
-                    'личном кабинете</b>')
+                    '<b>Полную историю вы можете посмотреть '
+                    '<a href="https://svoya-proverka.ru/cabinet/">на сайте</a> в личном кабинете</b>')
             else:
                 await msg.answer(f'Вы не вошли в профиль!\n'
                                  f'Для входа используйте /start')
